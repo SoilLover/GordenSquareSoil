@@ -1,0 +1,11 @@
+# summarizing taxa from Phyla to Genus
+summarize_taxa.py -i merged_otu_table.biom -o taxonomy_summaries -m mapping_file.txt
+
+# comparing alpha diversity between years with different metrics
+compare_alpha_diversity.py -i chao1.txt -m mapping_file.txt -c Year -o compare_alpha_diversity_between_years_CHAO1
+compare_alpha_diversity.py -i PD_whole_tree.txt -m mapping_file.txt -c Year -o compare_alpha_diversity_between_years_PD
+compare_alpha_diversity.py -i observed_OTUs -m mapping_file.txt -c Year -o compare_alpha_diversity_between_years_CHAO1
+
+# testing beta significance of weighted and unweighted
+beta_significance.py -i merged_otu_table.biom -t 97_otus.tree.txt -n 100 -s unweighted_unifrac -o unweighted_unifrac_significance.txt
+beta_significance.py -i merged_otu_table.biom -t 97_otus.tree.txt -n 100 -s weighted_unifrac -o weighted_unifrac_significance.txt
