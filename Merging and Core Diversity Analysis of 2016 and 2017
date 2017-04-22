@@ -1,0 +1,70 @@
+# merging the biom tables from 2016 and 2017 to one merged biom table
+#!/bin/bash
+merge_otu_tables.py -i ./2016/otus/otu_table.biom,./2017/otus/otu_table.biom -o merged_otu_table.biom
+
+# summarizing the merged biom table to obtain sequencing depth value for core diversity analysis
+biom_summarize-table -i merged_otu_table.biom -o merged_otu_table_summary.txt
+
+# core diversity analysis
+core_diversity_analyses.py -o cdout/ -i merged_otu_table_biom -m mapping_file.txt -t 97_otus.tree.txt -e 371590 -- recover_from_failure
+
+# the following is a log of code that forms the core diversity analysis
+# Filter low sequence count samples from table (minimum sequence count: 371590) command 
+filter_samples_from_otu_table.py -i merged_otu_table.biom -o cdout//table_mc371590.biom -n 371590
+
+# Rarify the OTU table to 371590 sequences/sample command 
+single_rarefaction.py -i cdout//table_mc371590.biom -o cdout//table_even371590.biom -d 371590
+
+# Beta Diversity (weighted_unifrac) command 
+beta_diversity.py -i cdout//table_even371590.biom -o cdout//bdiv_even371590/ --metrics weighted_unifrac  -t 97_otus.tree.txt 
+
+# Rename distance matrix (weighted_unifrac) command 
+mv cdout//bdiv_even371590//weighted_unifrac_table_even371590.txt cdout//bdiv_even371590//weighted_unifrac_dm.txt
+
+# Principal coordinates (weighted_unifrac) command 
+principal_coordinates.py -i cdout//bdiv_even371590//weighted_unifrac_dm.txt -o cdout//bdiv_even371590//weighted_unifrac_pc.txt 
+
+# Make emperor plots, weighted_unifrac) command 
+make_emperor.py -i cdout//bdiv_even371590//weighted_unifrac_pc.txt -o cdout//bdiv_even371590//weighted_unifrac_emperor_pcoa_plot/ -m mapping_file.txt 
+
+# Beta Diversity (unweighted_unifrac) command 
+beta_diversity.py -i cdout//table_even371590.biom -o cdout//bdiv_even371590/ --metrics unweighted_unifrac  -t 97_otus.tree.txt 
+
+# Rename distance matrix (unweighted_unifrac) command 
+mv cdout//bdiv_even371590//unweighted_unifrac_table_even371590.txt cdout//bdiv_even371590//unweighted_unifrac_dm.txt
+
+# Principal coordinates (unweighted_unifrac) command 
+principal_coordinates.py -i cdout//bdiv_even371590//unweighted_unifrac_dm.txt -o cdout//bdiv_even371590//unweighted_unifrac_pc.txt 
+
+# Make emperor plots, unweighted_unifrac) command 
+make_emperor.py -i cdout//bdiv_even371590//unweighted_unifrac_pc.txt -o cdout//bdiv_even371590//unweighted_unifrac_emperor_pcoa_plot/ -m mapping_file.txt 
+
+# Alpha rarefaction command 
+multiple_rarefactions.py -i cdout//table_mc371590.biom -m 10 -x 371590 -s 37158 -o cdout//arare_max371590//rarefaction/ 
+
+# Alpha diversity on rarefied OTU tables command 
+alpha_diversity.py -i cdout//arare_max371590//rarefaction/ -o cdout//arare_max371590//alpha_div/  -t 97_otus.tree.txt
+
+# Collate alpha command 
+collate_alpha.py -i cdout//arare_max371590//alpha_div/ -o cdout//arare_max371590//alpha_div_collated/ 
+
+# Removing intermediate files command 
+rm -r cdout//arare_max371590//rarefaction/ cdout//arare_max371590//alpha_div/
+
+# Rarefaction plot: All metrics command 
+make_rarefaction_plots.py -i cdout//arare_max371590//alpha_div_collated/ -m mapping_file.txt -o cdout//arare_max371590//alpha_rarefaction_plots/ 
+
+# Sort OTU Table command 
+sort_otu_table.py -i cdout//table_mc371590.biom -o cdout//taxa_plots/table_mc371590_sorted.biom
+
+# Summarize Taxonomy command 
+summarize_taxa.py -i cdout//taxa_plots/table_mc371590_sorted.biom -o cdout//taxa_plots/ 
+
+# Plot Taxonomy Summary command 
+plot_taxa_summary.py -i cdout//taxa_plots/table_mc371590_sorted_L2.txt,cdout//taxa_plots/table_mc371590_sorted_L3.txt,cdout//taxa_plots/table_mc371590_sorted_L4.txt,cdout//taxa_plots/table_mc371590_sorted_L5.txt,cdout//taxa_plots/table_mc371590_sorted_L6.txt -o cdout//taxa_plots//taxa_summary_plots/ 
+
+# Compress the filtered BIOM table command 
+gzip cdout//table_mc371590.biom
+
+# Compress the rarefied BIOM table command 
+gzip cdout//table_even371590.biom
