@@ -1,6 +1,6 @@
 # GordenSquareSoil
 
-This repository contains the code that was used to analyse raw sequence data obtained from bacteria in Gorden Square Gardens, London, UK. This data is presented in the 2017 paper by Acty et al., 2017 in the Journal of Applied and Environmental Microbiology. 
+This repository contains the code that was used to analyse sequence data obtained from bacterial genomes collected in Gorden Square Gardens, London, UK. This data is presented in the 2017 paper by Acty et al., in the Journal of Applied and Environmental Microbiology. 
 
 Files in the repository include:
 - processing of raw 2016 data to generate biom table
