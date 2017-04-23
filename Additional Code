@@ -9,3 +9,7 @@ compare_alpha_diversity.py -i observed_OTUs -m mapping_file.txt -c Year -o compa
 # testing beta significance of weighted and unweighted
 beta_significance.py -i merged_otu_table.biom -t 97_otus.tree.txt -n 100 -s unweighted_unifrac -o unweighted_unifrac_significance.txt
 beta_significance.py -i merged_otu_table.biom -t 97_otus.tree.txt -n 100 -s weighted_unifrac -o weighted_unifrac_significance.txt
+
+# forming a UPGMA cluster tree for weighted and unweighted Unifrac
+upgma_cluster.py -i weighted_unifrac_dm.txt -o weight_beta_div_cluster.tre
+upgma_cluster.py -i unweighted_unifrac_dm.txt -o unweight_beta_div_cluster.tre
